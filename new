@@ -1,0 +1,174 @@
+plot Current_Put = putStrikeValue;
+Current_Put.setDefaultColor(Color.Orange);
+plot Developing_Call = devCallStrikeValue;
+Developing_Call.setDefaultColor(Color.Yellow);
+plot Developing_Put = devPutStrikeValue;
+Developing_Put.setDefaultColor(Color.Yellow);
+plot Developing_Top_Pivot = devTopPivot;
+Developing_Top_Pivot.setDefaultColor(Color.Blue);
+plot Developing_Central_Pivot = devCentralPivot;
+Developing_Central_Pivot.setDefaultColor(CreateColor(168,0,168));
+plot Developing_Bottom_Pivot = devBottomPivot;
+Developing_Bottom_Pivot.setDefaultColor(Color.Blue);
+
+#Plots
+#Central Pivot Range
+plot CP_Top = topPivot;
+CP_Top.setStyle(Curve.POINTS);
+CP_Top.setLineWeight(5);
+plot Central_Pivot = centralPivot;
+Central_Pivot.setlineWeight(2);
+Central_Pivot.SetPaintingStrategy(PaintingStrategy.SQUARES);;
+Central_Pivot.setDefaultColor(Color.Orange);
+plot CP_Bottom = bottomPivot;
+CP_Bottom.setStyle(Curve.POINTS);
+
+#Traditional Pivots
+plot tR_1 = if(Plot_Traditional_Pivot_R1S1) then tR1 else Double.Nan;
+tR_1.setDefaultColor(Color.Red);
+tR_1.setStyle(Curve.POINTS);
+plot tS_1 = if(Plot_Traditional_Pivot_R1S1) then tS1 else Double.Nan;
+tS_1.setDefaultColor(Color.Green);
+tS_1.setStyle(Curve.POINTS);
+plot tR_2 = if(Plot_Traditional_Pivot_R2S2) then tR2 else Double.Nan;
+tR_2.setDefaultColor(Color.Red);
+tR_2.setStyle(Curve.POINTS);
+plot tS_2 = if(Plot_Traditional_Pivot_R2S2) then tS2 else Double.Nan;
+tS_2.setDefaultColor(Color.Green);
+tS_2.setStyle(Curve.POINTS);
+plot tR_3 = if(Plot_Traditional_Pivot_R3S3) then tR3 else Double.Nan;
+tR_3.setDefaultColor(Color.Red);
+tR_3.setStyle(Curve.POINTS);
+plot tS_3 = if(Plot_Traditional_Pivot_R3S3) then tS3 else Double.Nan;
+tS_3.setDefaultColor(Color.Red);
+tS_3.setStyle(Curve.POINTS);
+
+#
+plot cR3 = if(Plot_Camarilla_Pivot_R3S3) then camR3 else Double.Nan;
+cR3.setDefaultColor(Color.Red);
+plot cS3 = if(Plot_Camarilla_Pivot_R3S3) then camS3 else Double.Nan;
+cS3.setDefaultColor(Color.Green);
+plot cR1 = if(Plot_Camarilla_Pivot_R3S3) then camR1 else Double.Nan;
+cR1.setDefaultColor(Color.Red);
+plot cS1 = if(Plot_Camarilla_Pivot_R1S1) then camS1 else Double.Nan;
+cS1.setDefaultColor(Color.Green);
+plot cR2 = if(Plot_Camarilla_Pivot_R2S2) then camR2 else Double.Nan;
+cR2.setDefaultColor(Color.Red);
+plot cS2 = if(Plot_Camarilla_Pivot_R2S2) then camS2 else Double.Nan;
+cS2.setDefaultColor(Color.Green);
+plot cR4 = if(Plot_Camarilla_Pivot_R4S4) then camR4 else Double.Nan;
+cR4.setDefaultColor(Color.Red);
+plot cS4 = if(Plot_Camarilla_Pivot_R4S4) then camS4 else Double.Nan;
+cS4.setDefaultColor(Color.Green);
+plot cR5 = if(Plot_Camarilla_Pivot_R5S5) then camR5 else Double.Nan;
+cR5.setDefaultColor(Color.Red);
+plot cS5 = if(Plot_Camarilla_Pivot_R5S5) then camS5 else Double.Nan;
+cS5.setDefaultColor(Color.Green);
+#is_newbar
+def t = GetYYYYMMDD();
+
+def openingBarOpen = high[-1] == high(GetSymbol(),pivotTF);
+def openingBarClosed = openingBarOpen[1];
+
+#Trade Calculations
+def tradeType = if(Source_For_Trigger>topPivot) then
+        1#Sell Put
+    else (if(Source_For_Trigger<bottomPivot) then
+        2#Sell Call
+    else (if(Source_For_Trigger<topPivot and Source_For_Trigger>bottomPivot) then
+        3#Sell IC
+    else
+    0));
+def tradeDecision = if(openingBarClosed and tradeTheDay) then tradeType[1] else Double.NaN;
+def strikeValue = if(openingBarClosed and tradeTheDay) then 
+(if tradeDecision == 1 then putStrikeValue
+else if tradeDecision == 2 then callStrikeValue
+else if tradeDecision == 3 then icCallStrikeValue
+else Double.Nan) else 0;
+
+def strikeValue2 = if(openingBarClosed and tradeTheDay) then 
+(if tradeDecision == 1 then putStrikeValue2
+else if tradeDecision == 2 then callStrikeValue2
+else if tradeDecision == 3 then icPutStrikeValue
+else Double.Nan) else 0;
+
+#aaa
+#tradeLabelText := tradeDecision + ' for ' + str.tostring(strikeValue, '#.##')
+
+def yPlacement = if(openingBarClosed and tradeTheDay) then 
+(if tradeDecision == 1 then putStrikeValue
+else if tradeDecision == 2 then callStrikeValue
+else if tradeDecision == 3 then icCallStrikeValue
+else Double.Nan) else 0;
+
+#aaa
+#labelStyle :=
+         #tradeDecision == "Sell Put" ? #label.style_label_upper_left:
+         #tradeDecision == "Sell Call" ? #label.style_label_lower_left:
+         #tradeDecision == "Sell IC" ?  label.style_label_lower_left: label.style_label_lower_left
+def labelStyle = if(openingBarClosed and tradeTheDay) then 
+(if tradeDecision == 1 then 1#label.style_label_upper_left
+else if tradeDecision == 2 then 2#label.style_label_lower_left
+else if tradeDecision == 3 then 3#label.style_label_lower_left
+else 3)#label.style_label_lower_left) 
+else 0;#label.style_label_lower_right
+
+AddChartBubble(openingBarClosed and tradeTheDay and (showHistoricalTradeLabel or pivotLastBar) and tradeDecision == 1, yPlacement,"Sell Put Strike " + Floor(strikeValue*100)/100 + " | " +
+             "Buy Put Strike " + Floor(strikeValue*100)/100 , Color.Blue, yes);
+AddChartBubble(openingBarClosed and tradeTheDay and (showHistoricalTradeLabel or pivotLastBar) and tradeDecision == 2, yPlacement,"Sell Call Strike " + Floor(strikeValue*100)/100 + " | " +
+             "Buy Call Strike " + Floor(strikeValue*100)/100 , Color.Blue, no);
+AddChartBubble(openingBarClosed and tradeTheDay and (showHistoricalTradeLabel or pivotLastBar) and tradeDecision == 3, yPlacement,"IC | Sell Call Strike " + Floor(icCallStrikeValue*100)/100 + " | " +
+             "Buy Call Strike " + Floor(icCallStrikeValue2*100)/100 + " | " +
+             "Sell Put Strike " + Floor(icPutStrikeValue*100)/100 + " | " +
+             "Buy Put Strike " + Floor(icPutStrikeValue2*100)/100 , Color.Blue, no); 
+
+plot Strike_Value = if(tradeTheDay and !openingBarOpen) then strikeValue else Double.NaN;
+Strike_Value.setDefaultColor(Color.White);
+Strike_Value.SetPaintingStrategy(PaintingStrategy.DASHES);
+
+def wins = if(openingBarOpen and tradeTheDay[1]) then (if(tradeDecision == 1) then (if(close[1] > strikeValue) then wins + 1 else wins) 
+else (if(tradeDecision == 2) then (if(close[1]<strikeValue) then wins + 1 else wins)
+else (if(tradeDecision == 3) then
+(if(close[1] > strikeValue2 and close[1] < strikeValue) then wins + 1 else wins)else 0))) else 0;
+
+def losses = if(openingBarOpen and tradeTheDay[1]) then (if(tradeDecision == 1) then (if(close[1] < strikeValue) then losses + 1 else losses) 
+else (if(tradeDecision == 2) then (if(close[1]>strikeValue) then losses + 1 else losses)
+else (if(tradeDecision == 3) then
+(if(close[1] < strikeValue2 or close[1] > strikeValue) then losses + 1 else losses)else 0))) else 0;
+#0:No Trade 1:Loss 2:Win
+def tradeResult = if(openingBarOpen and tradeTheDay[1]) then (if(tradeDecision == 1) then (if(close[1] > strikeValue) then 2 else 1) 
+else (if(tradeDecision == 2) then (if(close[1]<strikeValue) then 2 else 1)
+else (if(tradeDecision == 3) then
+(if(close[1] > strikeValue2 and close[1] < strikeValue) then 2 else 1)else 0))) else 0;
+
+def putWins = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 1) then (if(close[1] > strikeValue) then putWins + 1 else putWins) else putWins;
+
+def putLosses = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 1) then (if(close[1] < strikeValue) then putLosses + 1 else putLosses) else putLosses;
+
+def putCount = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 1) then  putCount + 1 else putCount;
+
+def callWins = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 2) then (if(close[1] < strikeValue) then callWins + 1 else callWins) else callWins;
+
+def callLosses = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 2) then (if(close[1] > strikeValue) then callLosses + 1 else callLosses) else callLosses;
+
+def callCount = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 1) then  callCount + 1 else callCount;
+
+def icWins = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 3) then (if(close[1] > strikeValue2 and close[1] < strikeValue) then icWins + 1 else icWins) else icWins;
+
+def icLosses = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 3) then (if(close[1] < strikeValue2 or close[1] > strikeValue) then icLosses + 1 else icLosses) else icLosses;
+
+def icCount = if(openingBarOpen and tradeTheDay[1] and tradeDecision == 3) then  icCount + 1 else icCount;
+
+AddChartBubble(openingBarOpen and tradeTheDay[1] ,yPlacement,if(tradeResult == 2) then "Win" else if(tradeResult == 1) then "Loss" else "", if(tradeResult == 2) then Color.green else Color.Red, if(tradeDecision == 1) then yes else no);
+
+
+
+# Results & Current Trade
+#1:"Optimal (Hedge)" 2:"Good" 3:"Decent" 4:"Standard"
+def premiumValue = if((strikeValue < bottomPivot and close < bottomPivot) or
+     (strikeValue > topPivot and close > topPivot)) then 1
+    else if((strikeValue < bottomPivot and close < centralPivot) or
+     (strikeValue > topPivot and close > centralPivot)) then 2
+    else if((strikeValue < bottomPivot and close < topPivot) or
+     (strikeValue > topPivot and close > bottomPivot)) then 3
+    else 4;
