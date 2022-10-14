@@ -20,7 +20,6 @@ def main():
         driver.delete_all_cookies()
 
         key_file = input("Plz insert keyword file path : ")
-        #key_file = 'keywords.xlsx'
         key_file = key_file + '.xlsx' if('.xlsx' not in key_file) else key_file
         df = pd.read_excel(key_file)
         result = []
@@ -69,8 +68,6 @@ def main():
                             phone = item_type.replace('phone:tel:','')
                     else:    
                         website = div.find_element(By.TAG_NAME , 'a').get_attribute('href')
-                #address = driver.find_element('xpath' , '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[7]/div[3]/button/div[1]/div[2]/div[1]').text
-                #phone = str(driver.find_element('xpath' , '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[7]/div[7]/button/div[1]/div[2]/div[1]').text)
                 la_index = href.index('@')
                 la_end = href.index(',',la_index)
                 lo_end  = href.index(',',la_end +1)
@@ -102,24 +99,6 @@ def main():
                 except:
                     timing = ''
                 category = driver.find_element('xpath' , '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[2]/div[1]/div[1]/div[2]/div/div[2]/span[1]/span[1]/button').text
-                #website = driver.find_element('xpath' , '//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[7]/div[6]/a')
-                #website = website.get_attribute('href')
-                # try:
-                #     website = driver.find_elementt(By.CLASS_NAME , 'CsEnBe').get_attribute('href').text
-                # except:
-                #     website = ''
-                #driver.find_element('xpath','//*[@id="QA0Szd"]/div/div/div[1]/div[2]/div/div[1]/div/div/div[27]/div').click()
-                #sleep(2)
-                #data_p = driver.find_element('xpath', '//*[@id="yDmH0d"]/c-wiz').get_attribute('data-p')
-                #p_index = data_p.index('["')
-                #p_end = data_p.index('"',p_index+2)
-                #c_index = data_p.index('["',p_end)
-                #c_end = data_p.index('"',c_index+2)
-                #place_id = data_p[p_index+2 : p_end]
-                #c_id = data_p[c_index+2:c_end]
-                #driver.find_element('xpath','//*[@id="kCvOeb"]/div[2]/div/div[1]/div/button/span').click()
-                #sleep(2)
-                #review_url = 'https://search.google.com/local/writereview?placeid=' + place_id
                 reviews = []
                 review_divs = []
                 sleep(1)
@@ -170,13 +149,10 @@ def main():
                     'Website' : website,
                     'PriceRange' : '',
                     'Result_Type' : 'Organic',
-                    #'Placeid' : place_id,
-                    #'Review_link' : review_url,
                     'URL' : href,
                 })
         
         save_file = input("Save File Name : ")
-        #save_file = 'Results.xlsx'
         save_file = save_file if('.xlsx' in save_file) else save_file + '.xlsx'
         df = pd.DataFrame(result)
         writer = pd.ExcelWriter(save_file,engine='xlsxwriter')
